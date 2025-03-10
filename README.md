@@ -1,6 +1,7 @@
 # BotLabTask2
 
 Task 2:
+
 Create a new Android native application project.
 Integrate the OpenCV library into the project.
 Use JNI to bridge communication between Java/Kotlin and C/C++.
