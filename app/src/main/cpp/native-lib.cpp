@@ -1,26 +1,32 @@
 #include <jni.h>
 #include <string>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-#include <android/log.h>
+#include <opencv2/opencv.hpp>
+#include <android/bitmap.h>
 
-#define LOG_TAG "OpenCV"
+using namespace cv;
 
 extern "C"
-JNIEXPORT jboolean JNICALL
-Java_world_tally_botlabtask2_MainActivity_IsOpenCVInitialized (JNIEnv *env, jobject thiz)
+JNIEXPORT void JNICALL
+Java_world_tally_botlabtask2_MainActivity_processImage(JNIEnv *pEnv, jobject pObj, jobject pBitmap, jint pFilterType)
 {
-    // In OpenCV 4.x and later, explicit initialization is often not required
-    // calling basic OpenCV functions like cv::Mat is enough to check if OpenCV is correctly linked.
-    try {
+    AndroidBitmapInfo info;
+    void *pixels;
 
-        cv::Mat testMat;
-        testMat.create(10, 10, CV_8UC1);
-        return true;
+    if (AndroidBitmap_getInfo(pEnv, pBitmap, &info) < 0) return;
+    if (AndroidBitmap_lockPixels(pEnv, pBitmap, &pixels) < 0) return;
 
-    } catch (...) {
+    Mat src(info.height, info.width, CV_8UC4, pixels);
+    Mat dst;
 
-        return false;
+    if (pFilterType == 0) {
+
+        cvtColor(src, dst, COLOR_RGBA2GRAY);  // Grayscale
+    } else if (pFilterType == 1) {
+
+        cvtColor(src, dst, COLOR_RGBA2GRAY);
+        Canny(dst, dst, 100, 200);  // Edge Detection
     }
+
+    cvtColor(dst, src, COLOR_GRAY2RGBA);
+    AndroidBitmap_unlockPixels(pEnv, pBitmap);
 }
